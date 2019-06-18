@@ -1,8 +1,6 @@
 # This script executes 'rdpscan' and ingests the results into PDQ Inventory.
 # https://github.com/robertdavidgraham/rdpscan
 # https://github.com/Colby-PDQ/BlueKeep-Scanner-PS-Parser/blob/master/Find-BlueKeepVulnerableComputers.ps1
-# 
-# v 001
 
 ################################################################################
 ## Setup
