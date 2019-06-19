@@ -55,9 +55,9 @@
       </Columns>
     </ReportDefinition>
     <Created>2019-06-19T13:22:55.0000000-06:00</Created>
-    <Description></Description>
+    <Description>https://github.com/Colby-PDQ/BlueKeep-Scanner-PS-Parser/blob/master/BlueKeep%20Report.xml</Description>
     <IsNew value="false" />
-    <Modified>2019-06-19T13:26:14.0000000-06:00</Modified>
+    <Modified>2019-06-19T13:34:32.0000000-06:00</Modified>
     <Name>BlueKeep</Name>
     <Path>Reports\BlueKeep</Path>
     <ReportFolderId value="1" />
