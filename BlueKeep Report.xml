@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<AdminArsenal.Export Code="PDQInventory" Name="PDQ Inventory" Version="17.1.0.0" MinimumVersion="3.1">
+  <Report>
+    <ReportDefinition name="Definition">
+      <RootFilter name="Filter">
+        <Comparison>All</Comparison>
+        <Filters type="list" />
+      </RootFilter>
+      <ReportDefinitionTypeName>BasicReportDefinition</ReportDefinitionTypeName>
+      <Columns type="list">
+        <Column>
+          <Column>Name</Column>
+          <Summary></Summary>
+          <Table>Computer</Table>
+          <Title></Title>
+        </Column>
+        <Column>
+          <Column>CustomComputerItem6</Column>
+          <Summary></Summary>
+          <Table>Computer</Table>
+          <Title>BlueKeep Status</Title>
+          <CustomComputerItem name="ColumnDefinition">
+            <Name>BlueKeep Status</Name>
+            <ItemType>String</ItemType>
+          </CustomComputerItem>
+        </Column>
+        <Column>
+          <Column>CustomComputerItem7</Column>
+          <Summary></Summary>
+          <Table>Computer</Table>
+          <Title>BlueKeep Notes</Title>
+          <CustomComputerItem name="ColumnDefinition">
+            <Name>BlueKeep Notes</Name>
+            <ItemType>String</ItemType>
+          </CustomComputerItem>
+        </Column>
+        <Column>
+          <Column>OS</Column>
+          <Summary></Summary>
+          <Table>Computer</Table>
+          <Title></Title>
+        </Column>
+        <Column>
+          <Column>OSVersion</Column>
+          <Summary></Summary>
+          <Table>Computer</Table>
+          <Title></Title>
+        </Column>
+        <Column>
+          <Column>OSServicePack</Column>
+          <Summary></Summary>
+          <Table>Computer</Table>
+          <Title></Title>
+        </Column>
+      </Columns>
+    </ReportDefinition>
+    <Created>2019-06-19T13:22:55.0000000-06:00</Created>
+    <Description></Description>
+    <IsNew value="false" />
+    <Modified>2019-06-19T13:26:14.0000000-06:00</Modified>
+    <Name>BlueKeep</Name>
+    <Path>Reports\BlueKeep</Path>
+    <ReportFolderId value="1" />
+    <TypeName>BasicReport</TypeName>
+    <ReportType>BasicReport</ReportType>
+  </Report>
+</AdminArsenal.Export>

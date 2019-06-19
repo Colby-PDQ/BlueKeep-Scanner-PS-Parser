@@ -1,0 +1,187 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<AdminArsenal.Export Code="PDQInventory" Name="PDQ Inventory" Version="17.1.0.0" MinimumVersion="4.0">
+  <Collection>
+    <ImportedPath></ImportedPath>
+    <TypeName>StaticCollection</TypeName>
+    <Created>2019-06-06T16:05:40.0000000-06:00</Created>
+    <Description></Description>
+    <Error></Error>
+    <Id value="2640" />
+    <IsEnabled value="true" />
+    <Modified>2019-06-06T16:05:40.0000000-06:00</Modified>
+    <Name>BlueKeep</Name>
+    <ParentId value="null" />
+    <Path>BlueKeep</Path>
+    <Type>StaticCollection</Type>
+    <Computers type="list" />
+    <Children type="list">
+      <Collection>
+        <ReportDefinition name="Definition">
+          <RootFilter name="Filter">
+            <Comparison>All</Comparison>
+            <Filters type="list">
+              <ValueFilter>
+                <Table>Computer</Table>
+                <Column>CustomComputerItem6</Column>
+                <Comparison>Equals</Comparison>
+                <Value>SAFE</Value>
+                <CustomComputerItem name="ColumnDefinition">
+                  <Name>BlueKeep Status</Name>
+                  <ItemType>String</ItemType>
+                </CustomComputerItem>
+              </ValueFilter>
+            </Filters>
+          </RootFilter>
+          <ReportDefinitionTypeName>BasicReportDefinition</ReportDefinitionTypeName>
+          <Columns type="list">
+            <Column>
+              <Column>ComputerId</Column>
+              <Summary></Summary>
+              <Table>Computer</Table>
+              <Title></Title>
+            </Column>
+          </Columns>
+        </ReportDefinition>
+        <IsDrilldown value="false" />
+        <ImportedPath></ImportedPath>
+        <TypeName>DynamicCollection</TypeName>
+        <Created>2019-06-06T16:05:47.0000000-06:00</Created>
+        <Description></Description>
+        <Error></Error>
+        <Id value="2641" />
+        <IsEnabled value="true" />
+        <Modified>2019-06-06T16:05:47.0000000-06:00</Modified>
+        <Name>BlueKeep - Safe</Name>
+        <ParentId value="2640" />
+        <Path>BlueKeep\BlueKeep - Safe</Path>
+        <Type>DynamicCollection</Type>
+        <Children type="list" />
+      </Collection>
+      <Collection>
+        <ReportDefinition name="Definition">
+          <RootFilter name="Filter">
+            <Comparison>All</Comparison>
+            <Filters type="list">
+              <ValueFilter>
+                <Table>Computer</Table>
+                <Column>CustomComputerItem6</Column>
+                <Comparison>Equals</Comparison>
+                <Value>VULNERABLE</Value>
+                <CustomComputerItem name="ColumnDefinition">
+                  <Name>BlueKeep Status</Name>
+                  <ItemType>String</ItemType>
+                </CustomComputerItem>
+              </ValueFilter>
+            </Filters>
+          </RootFilter>
+          <ReportDefinitionTypeName>BasicReportDefinition</ReportDefinitionTypeName>
+          <Columns type="list">
+            <Column>
+              <Column>ComputerId</Column>
+              <Summary></Summary>
+              <Table>Computer</Table>
+              <Title></Title>
+            </Column>
+          </Columns>
+        </ReportDefinition>
+        <IsDrilldown value="false" />
+        <ImportedPath></ImportedPath>
+        <TypeName>DynamicCollection</TypeName>
+        <Created>2019-06-06T16:06:21.0000000-06:00</Created>
+        <Description></Description>
+        <Error></Error>
+        <Id value="2642" />
+        <IsEnabled value="true" />
+        <Modified>2019-06-06T16:06:42.0000000-06:00</Modified>
+        <Name>BlueKeep - Vulnerable</Name>
+        <ParentId value="2640" />
+        <Path>BlueKeep\BlueKeep - Vulnerable</Path>
+        <Type>DynamicCollection</Type>
+        <Children type="list" />
+      </Collection>
+      <Collection>
+        <ReportDefinition name="Definition">
+          <RootFilter name="Filter">
+            <Comparison>All</Comparison>
+            <Filters type="list">
+              <ValueFilter>
+                <Table>Computer</Table>
+                <Column>CustomComputerItem6</Column>
+                <Comparison>Equals</Comparison>
+                <Value>UNKNOWN</Value>
+                <CustomComputerItem name="ColumnDefinition">
+                  <Name>BlueKeep Status</Name>
+                  <ItemType>String</ItemType>
+                </CustomComputerItem>
+              </ValueFilter>
+            </Filters>
+          </RootFilter>
+          <ReportDefinitionTypeName>BasicReportDefinition</ReportDefinitionTypeName>
+          <Columns type="list">
+            <Column>
+              <Column>ComputerId</Column>
+              <Summary></Summary>
+              <Table>Computer</Table>
+              <Title></Title>
+            </Column>
+          </Columns>
+        </ReportDefinition>
+        <IsDrilldown value="false" />
+        <ImportedPath></ImportedPath>
+        <TypeName>DynamicCollection</TypeName>
+        <Created>2019-06-06T16:06:49.0000000-06:00</Created>
+        <Description></Description>
+        <Error></Error>
+        <Id value="2643" />
+        <IsEnabled value="true" />
+        <Modified>2019-06-06T16:07:02.0000000-06:00</Modified>
+        <Name>BlueKeep - Unknown</Name>
+        <ParentId value="2640" />
+        <Path>BlueKeep\BlueKeep - Unknown</Path>
+        <Type>DynamicCollection</Type>
+        <Children type="list" />
+      </Collection>
+      <Collection>
+        <ReportDefinition name="Definition">
+          <RootFilter name="Filter">
+            <Comparison>All</Comparison>
+            <Filters type="list">
+              <ValueFilter>
+                <Table>Computer</Table>
+                <Column>CustomComputerItem6</Column>
+                <Comparison>Equals</Comparison>
+                <CustomComputerItem name="ColumnDefinition">
+                  <Name>BlueKeep Status</Name>
+                  <ItemType>String</ItemType>
+                </CustomComputerItem>
+              </ValueFilter>
+            </Filters>
+          </RootFilter>
+          <ReportDefinitionTypeName>BasicReportDefinition</ReportDefinitionTypeName>
+          <Columns type="list">
+            <Column>
+              <Column>ComputerId</Column>
+              <Summary></Summary>
+              <Table>Computer</Table>
+              <Title></Title>
+            </Column>
+          </Columns>
+        </ReportDefinition>
+        <IsDrilldown value="false" />
+        <ImportedPath></ImportedPath>
+        <TypeName>DynamicCollection</TypeName>
+        <Created>2019-06-06T16:07:20.0000000-06:00</Created>
+        <Description></Description>
+        <Error></Error>
+        <Id value="2644" />
+        <IsEnabled value="true" />
+        <Modified>2019-06-06T16:07:31.0000000-06:00</Modified>
+        <Name>BlueKeep - Not Scanned</Name>
+        <ParentId value="2640" />
+        <Path>BlueKeep\BlueKeep - Not Scanned</Path>
+        <Type>DynamicCollection</Type>
+        <Children type="list" />
+      </Collection>
+    </Children>
+  </Collection>
+</AdminArsenal.Export>
