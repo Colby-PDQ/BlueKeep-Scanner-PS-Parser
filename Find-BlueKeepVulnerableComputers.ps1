@@ -24,7 +24,8 @@ param (
     [int32] $FailSafeMax = 1200,
     [string]$CustomFieldNameStatus = "BlueKeep Status",
     [string]$CustomFieldNameNotes = "BlueKeep Notes",
-    [switch]$Randomize = $false
+    [switch]$Randomize = $false,
+    [int32] $Port = 3389
 )
 
 if ( $MaxJobs -lt 1 ) { 
@@ -219,9 +220,10 @@ ForEach ( $Target in $Targets ) {
 
         $RDPScanEXE = $Using:RDPScanEXE
         $Target = $Using:Target
+        $Port = $Using:Port
         
         $StopWatch = [Diagnostics.Stopwatch]::StartNew()
-        $ScanResult = & "$RDPScanEXE" "$Target" 2>&1
+        $ScanResult = & "$RDPScanEXE" --port $Port "$Target" 2>&1
         $StopWatch.Stop()
 
         # The longest I've seen rdpscan.exe take is ~40 seconds, so write a warning if it took longer than that
