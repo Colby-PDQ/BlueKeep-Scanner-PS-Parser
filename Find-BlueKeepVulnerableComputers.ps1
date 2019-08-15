@@ -22,7 +22,7 @@ param (
     [string]$RDPScanEXE,
     [array] $Collections,
     [array] $Computers,
-    [int32] $MaxJobs = ( ( Get-CimInstance Win32_Processor ).ThreadCount * 4 ),
+    [int32] $MaxJobs,
     [int32] $FailSafeMax = 1200,
     [string]$CustomFieldNameStatus = "BlueKeep Status",
     [string]$CustomFieldNameNotes = "BlueKeep Notes",
@@ -30,10 +30,25 @@ param (
     [int32] $Port = 3389
 )
 
-if ( $MaxJobs -lt 1 ) { 
+Try {
 
-    Write-Warning "MaxJobs was set to $MaxJobs, and that's bad. Changing it to 1"
-    $MaxJobs = 1
+    $MaxJobsDefault = ( Get-CimInstance Win32_Processor ).ThreadCount * 4
+
+} Catch {
+
+    $MaxJobsDefault = 8
+    Write-Warning "The WMI query for this system's ThreadCount failed. Using a default of $MaxJobsDefault instead"
+
+}
+
+if ( -not $MaxJobs ) {
+
+    $MaxJobs = $MaxJobsDefault
+
+} elseif ( $MaxJobs -lt 1 ) {
+
+    Write-Warning "MaxJobs cannot be less than 1, setting it to $MaxJobsDefault"
+    $MaxJobs = $MaxJobsDefault
 
 }
 Write-Verbose "MaxJobs: $MaxJobs"
