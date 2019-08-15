@@ -11,6 +11,8 @@
     https://github.com/Colby-PDQ/BlueKeep-Scanner-PS-Parser/blob/master/Find-BlueKeepVulnerableComputers.ps1
 #>
 
+#Requires -Version 3.0
+
 ################################################################################
 ## Setup
 ################################################################################
