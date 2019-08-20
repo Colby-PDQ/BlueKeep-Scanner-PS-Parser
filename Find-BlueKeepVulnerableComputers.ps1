@@ -30,16 +30,7 @@ param (
     [int32] $Port = 3389
 )
 
-Try {
-
-    $MaxJobsDefault = ( Get-CimInstance Win32_Processor ).ThreadCount * 4
-
-} Catch {
-
-    $MaxJobsDefault = 8
-    Write-Warning "The WMI query for this system's ThreadCount failed. Using a default of $MaxJobsDefault instead"
-
-}
+$MaxJobsDefault = 16
 
 if ( -not $MaxJobs ) {
 
