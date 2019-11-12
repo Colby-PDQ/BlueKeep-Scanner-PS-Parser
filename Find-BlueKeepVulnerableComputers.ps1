@@ -11,8 +11,6 @@
     https://github.com/Colby-PDQ/BlueKeep-Scanner-PS-Parser/blob/master/Find-BlueKeepVulnerableComputers.ps1
 #>
 
-#Requires -Version 3.0
-
 ################################################################################
 ## Setup
 ################################################################################
@@ -23,14 +21,22 @@ param (
     [array] $Collections,
     [array] $Computers,
     [int32] $MaxJobs,
-    [int32] $FailSafeMax = 1200,
     [string]$CustomFieldNameStatus = "BlueKeep Status",
     [string]$CustomFieldNameNotes = "BlueKeep Notes",
     [switch]$Randomize = $false,
     [int32] $Port = 3389
 )
 
-$MaxJobsDefault = 16
+# Checking the PS version this way allows us to throw a more detailed error message, and to exit on a non-zero exit code
+if ( $PSVersionTable.PSVersion.Major -lt 7 ) {
+
+    Write-Error "This script requires PowerShell version 7 or greater. Detected version: $($PSVersionTable.PSVersion)"
+    "You can download the latest version of PowerShell from GitHub: https://github.com/PowerShell/PowerShell/releases"
+    Exit 5
+
+}
+
+$MaxJobsDefault = 32
 
 if ( -not $MaxJobs ) {
 
@@ -71,6 +77,7 @@ Write-Verbose "Retrieving targets from collection(s)"
 $Targets = New-Object System.Collections.ArrayList
 if ( $Collections ) {
 
+    # I'm not sure if it's safe to make this one Parallel because of the array "deduping"
     ForEach ( $Collection in $Collections ) {
         
         $CollectionComputers = PDQInventory.exe GetCollectionComputers "$Collection" 2>&1
@@ -126,91 +133,23 @@ $ResultsCSV = "$env:TEMP\$(New-Guid).csv"
 Write-Verbose "Creating $ResultsCSV"
 "Computer Name, $CustomFieldNameStatus, $CustomFieldNameNotes" | Out-File -FilePath "$ResultsCSV"
 
-# Keep track of job IDs to avoid stomping on jobs that don't belong to this script
-$Global:JobIDs = New-Object System.Collections.ArrayList
-
 
 
 ################################################################################
 ## Functions
 ################################################################################
 
-function Get-RunningJobCount {
-    
-    # Get-Job doesn't like it when the value you specify for -Id is $null
-    if ( $Global:JobIDs.Count -gt 0 ) {
-    
-        ( Get-Job -Id $Global:JobIDs | Where-Object State -eq "Running" ).Count
-
-    } else {
-
-        0
-
-    }
-
-}
-
 function Invoke-Cleanup {
 
     param (
         [array]$FilesToRemove
     )
-    
-    if ( $Global:JobIDs.Count -gt 0 ) {
-    
-        Write-Verbose "Removing all jobs"
-        Get-Job -Id $Global:JobIDs | Remove-Job -Force
-
-    }
 
     ForEach ( $File in $FilesToRemove ) {
     
         Write-Verbose "Removing $File"
         Remove-Item -Force -Path "$File"
 
-    }
-
-}
-
-function Clear-FinishedJobs {
-
-    param (
-        $MaxJobs,
-        $FailSafeMax,
-        $ResultsCSV
-    )
-
-    $FailSafe = 0
-    $NumberOfJobs = Get-RunningJobCount
-
-    # Once the job limit is reached, pause for a bit, then try again.
-    while ( $NumberOfJobs -ge $MaxJobs ) {
-        
-        # I know this is redundant, but I don't want to pause if the job limit _hasn't_ been reached.
-        $NumberOfJobs = Get-RunningJobCount
-
-        # This may seem backwards, but I want to make sure the last action to be run is the cleanup.
-        # I don't want a job to finish between the count and the cleanup and never get retrieved.
-        $CompletedJobs = Get-Job -Id $Global:JobIDs | Where-Object State -eq "Completed"
-        $CompletedJobs | Receive-Job | Tee-Object -FilePath "$ResultsCSV" -Append
-        $CompletedJobs | Remove-Job
-        ForEach ( $CompletedJob in $CompletedJobs ) {
-
-            $Global:JobIDs.Remove($CompletedJob.Id)
-
-        }
-
-        if ( $FailSafe -ge $FailSafeMax ) {
-            
-            Write-Error "Got stuck waiting for jobs to finish, something is taking too long"
-            Invoke-Cleanup -FilesToRemove $ResultsCSV
-            Exit 50
-            
-        }
-        $FailSafe ++
-        
-        Start-Sleep -Milliseconds 250
-        
     }
 
 }
@@ -222,102 +161,91 @@ function Clear-FinishedJobs {
 ################################################################################
 
 Write-Verbose "Scanning $($Targets.Count) targets"
-ForEach ( $Target in $Targets ) {
-
-    $ScriptBlock = {
-
-        $RDPScanEXE = $Using:RDPScanEXE
-        $Target = $Using:Target
-        $Port = $Using:Port
+$Results = $Targets | ForEach-Object -ThrottleLimit $MaxJobs -Parallel {
         
-        $StopWatch = [Diagnostics.Stopwatch]::StartNew()
-        $ScanResult = & "$RDPScanEXE" --port $Port "$Target" 2>&1
-        $StopWatch.Stop()
+    $Target     = $_
+    $Port       = $Using:Port
+    $RDPScanEXE = $Using:RDPScanEXE
+    $ResultsCSV = $Using:ResultsCSV
+    
+    $StopWatch = [Diagnostics.Stopwatch]::StartNew()
+    $ScanResult = & "$RDPScanEXE" --port $Port "$Target" 2>&1
+    $StopWatch.Stop()
 
-        # The longest I've seen rdpscan.exe take is ~40 seconds, so write a warning if it took longer than that
-        if ( $StopWatch.Elapsed.TotalSeconds -ge 45 ) {
+    # The longest I've seen rdpscan.exe take is ~40 seconds, so write a warning if it took longer than that
+    if ( $StopWatch.Elapsed.TotalSeconds -ge 45 ) {
 
-            # Interesting note: I wanted this to be Verbose, but that doesn't work in jobs
-            Write-Warning "$Target took $($StopWatch.Elapsed.TotalSeconds) seconds"
+        # Interesting note: I wanted this to be Verbose, but that doesn't work in jobs
+        Write-Warning "$Target took $($StopWatch.Elapsed.TotalSeconds) seconds"
 
-        }
+    }
 
-        # Process multi-line results
-        if ( $ScanResult.GetType().Name -eq "Object[]" ) {
+    # Process multi-line results
+    if ( $ScanResult.GetType().Name -eq "Object[]" ) {
 
-            # Check for errors
-            ForEach ( $Record in $ScanResult ) {
+        # Check for errors
+        ForEach ( $Record in $ScanResult ) {
 
-                if ( $Record.GetType().Name -eq "ErrorRecord" ) {
+            if ( $Record.GetType().Name -eq "ErrorRecord" ) {
 
-                    $ErrorFound = $true
-
-                } else {
-
-                    # Because there are multiple lines, this variable should always be created.
-                    # Please slap me with a trout if I am wrong.
-                    $ScanResultNormal = $Record
-
-                }
-
-            }
-
-            if ( $ErrorFound ) {
-
-                # Replace the computer name with 0.0.0.0 so it will pass the IP filter and go through result processor.
-                $ScanResult = $ScanResultNormal -replace "$Target", "0.0.0.0"
+                $ErrorFound = $true
 
             } else {
-            
-                # No errors were found, just grab the first line            
-                Write-Warning "$Target returned multiple results, but there were no errors"
-                $ScanResult = $ScanResult[0]
+
+                # Because there are multiple lines, this variable should always be created.
+                # Please slap me with a trout if I am wrong.
+                $ScanResultNormal = $Record
 
             }
 
         }
-        
-        # For some reason PowerShell inserts an empty line between every line.
-        # If you know how to capture output from rdpscan.exe without the extraneous lines (without writing to a file), please let me know!
-        # This _should_ let through both IPv4 and IPv6 addresses.
-        if ( $ScanResult -match "^\d+\.\d+\.\d+\.\d+|^[\da-f]+:[\da-f:]*:[\da-f]+" ) {
 
-            # Some results have --, but most have -. Putting -- first in the split makes it look for that pattern first
-            # and prevents it from splitting twice.
-            $SplitResult = $ScanResult -split "--|-"
-            
-            # .Trim() removes any extra whitespace from the beginning and end of each element in the array.
-            $SplitResult = $SplitResult.Trim()
+        if ( $ErrorFound ) {
 
-            # Computer name, SAFE/VULNERABLE/UNKNOWN, notes
-            "{0}, {1}, {2}" -f $Target, $SplitResult[1], $SplitResult[2]
+            # Replace the computer name with 0.0.0.0 so it will pass the IP filter and go through result processor.
+            $ScanResult = $ScanResultNormal -replace "$Target", "0.0.0.0"
 
         } else {
-
-            Write-Warning "$Target --- $ScanResult"
+        
+            # No errors were found, just grab the first line            
+            Write-Warning "$Target returned multiple results, but there were no errors"
+            $ScanResult = $ScanResult[0]
 
         }
 
     }
-
-    Clear-FinishedJobs -MaxJobs $MaxJobs -FailSafeMax $FailSafeMax -ResultsCSV $ResultsCSV
     
-    # Start this job
-    $Job = Start-Job -ScriptBlock $ScriptBlock
-    $null = $Global:JobIDs.Add($Job.Id)
+    # For some reason PowerShell inserts an empty line between every line.
+    # If you know how to capture output from rdpscan.exe without the extraneous lines (without writing to a file), please let me know!
+    # This _should_ let through both IPv4 and IPv6 addresses.
+    if ( $ScanResult -match "^\d+\.\d+\.\d+\.\d+|^[\da-f]+:[\da-f:]*:[\da-f]+" ) {
+
+        # Some results have --, but most have -. Putting -- first in the split makes it look for that pattern first
+        # and prevents it from splitting twice.
+        $SplitResult = $ScanResult -split "--|-"
+        
+        # .Trim() removes any extra whitespace from the beginning and end of each element in the array.
+        $SplitResult = $SplitResult.Trim()
+
+        # Computer name, SAFE/VULNERABLE/UNKNOWN, notes
+        $CSVLine = "{0}, {1}, {2}" -f $Target, $SplitResult[1], $SplitResult[2]
+        
+        # Dump $CSVLine into the output stream so $Results can capture it
+        $CSVLine
+        
+        # Use Write-Host to bypass the output stream since it's currently being captured by $Results
+        Write-Host $CSVLine
+
+    } else {
+
+        Write-Warning "$Target --- $ScanResult"
+
+    }
     
 }
 
-# Process the remaining jobs
-# -MaxJobs 1 makes the while loop run until there are no more running jobs
-Clear-FinishedJobs -MaxJobs 1 -FailSafeMax $FailSafeMax -ResultsCSV $ResultsCSV
-
-# This should never be True. I only created this because I'm paranoid :P
-if ( $Global:JobIDs.Count -ne 0 ) {
-
-    Write-Warning "The following job(s) did not get processed: $($Global:JobIDs)"
-
-}
+Write-Verbose "Writing results to CSV file"
+$Results | Out-File -FilePath "$ResultsCSV" -Append
 
 # Create Custom Fields if they don't exist
 # This will throw an error if the Custom Field already exists, but we don't care about that, so just send it into the ether with `$null =`
