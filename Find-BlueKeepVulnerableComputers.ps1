@@ -74,7 +74,7 @@ if ( ($Collections) -and ($Computers) ) {
 }
 
 Write-Verbose "Retrieving targets from collection(s)"
-$Targets = New-Object System.Collections.ArrayList
+$Targets = New-Object System.Collections.Generic.List[string]
 if ( $Collections ) {
 
     # I'm not sure if it's safe to make this one Parallel because of the array "deduping"
@@ -92,8 +92,7 @@ if ( $Collections ) {
                 # Dedupe the target list
                 if ( $CollectionComputer -notin $Targets ) {
 
-                    # https://foxdeploy.com/2016/03/23/coding-for-speed/
-                    $null = $Targets.Add($CollectionComputer)
+                    $Targets.Add($CollectionComputer)
 
                 }
 
